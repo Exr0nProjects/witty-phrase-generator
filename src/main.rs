@@ -1,5 +1,3 @@
-use std::{ env };
-
 use rand::prelude::{ thread_rng, IteratorRandom };
 
 fn main() {
