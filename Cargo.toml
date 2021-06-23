@@ -3,11 +3,11 @@ name = "witty-phrase-generator"
 version = "0.0.1"
 edition = "2018"
 description = "Generates witty three-word phrases suitable for memorable default names."
-license-file = "LISCENCE"
+license-file = "LICENCE"
 authors = [ "Exr0n" ]
 readme = "readme.md"
 keywords = [ "random", "phrase", "generator" ]
-categories = [ "command-line-utilities", "random-generators" ]
+categories = [ "command-line-utilities" ]
 repository = "https://github.com/Exr0nProjects/witty-phrase-generator"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
