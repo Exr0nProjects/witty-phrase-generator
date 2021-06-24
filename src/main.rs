@@ -3,17 +3,17 @@ use getopts::Options;
 use std::{ env, borrow::Cow };
 use rand::prelude::{ ThreadRng, thread_rng, IteratorRandom };
 
-static PATH_INTENSIFIERS: Cow<str> = String::from_utf8_lossy(include_bytes!("intensifiers.txt"));
-static PATH_ADJECTIVES  : Cow<str> = String::from_utf8_lossy(include_bytes!("adjectives.txt")  );
-static PATH_NOUNS       : Cow<str> = String::from_utf8_lossy(include_bytes!("nouns.txt")       );
-
-fn gen(rng: &mut ThreadRng, num: usize) -> Vec<&'static str> {
-    let mut ret = Vec::with_capacity(num);
+fn gen<'a>(mut rng: &mut ThreadRng, num: usize, 
+       path_intensifiers: &'a Cow<str>,
+       path_adjectives  : &'a Cow<str>,
+       path_nouns       : &'a Cow<str>,
+       ) -> Vec<&'a str> {
+    let mut ret = vec![""; num];
     let mut n = 0;
 
-    if num > 2 { ret[n] = PATH_INTENSIFIERS.lines().choose(&mut rng).unwrap(); n += 1; }
-    if num > 1 { ret[n] = PATH_ADJECTIVES  .lines().choose(&mut rng).unwrap(); n += 1; }
-    if num > 0 { ret[n] = PATH_NOUNS       .lines().choose(&mut rng).unwrap(); n += 1; }
+    if num > 2 { ret[n] = path_intensifiers.lines().choose(&mut rng).unwrap(); n += 1; }
+    if num > 1 { ret[n] = path_adjectives  .lines().choose(&mut rng).unwrap(); n += 1; }
+    if num > 0 { ret[n] = path_nouns       .lines().choose(&mut rng).unwrap(); }
 
     ret
 }
@@ -36,13 +36,18 @@ fn main() {
         return;
     }
 
+    let len = if matches.opt_present("2") { 2 } else { 3 };
+    let num = matches.opt_get_default("n", 1)
+                     .expect("Could not parse line count!");
+    let sep = matches.opt_get_default("s", "-".to_string())
+                     .expect("Could not parse separator!");
+
     let mut rng: ThreadRng = thread_rng();
-    let     num = matches.opt_get_default("n", 1)
-                         .expect("Could not parse line count!");
-    let     sep = matches.opt_get_default("s", "-".to_string())
-                         .expect("Could not parse separator!");
+    let path_intensifiers = String::from_utf8_lossy(include_bytes!("intensifiers.txt"));
+    let path_adjectives   = String::from_utf8_lossy(include_bytes!("adjectives.txt")  );
+    let path_nouns        = String::from_utf8_lossy(include_bytes!("nouns.txt")       );
 
     for _ in 0..num {
-        println!("{}", gen(&mut rng, num as usize).join(&sep));
+        println!("{}", gen(&mut rng, len as usize, &path_intensifiers, &path_adjectives, &path_nouns).join(&sep));
     };
 }
