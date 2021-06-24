@@ -1,6 +1,6 @@
 [package]
 name = "witty-phrase-generator"
-version = "0.0.1"
+version = "0.1.0"
 edition = "2018"
 description = "Generates witty three-word phrases suitable for memorable default names."
 license-file = "LICENCE"
@@ -14,3 +14,4 @@ repository = "https://github.com/Exr0nProjects/witty-phrase-generator"
 
 [dependencies]
 rand = "0.8.0"
+getopts = "0.2"
