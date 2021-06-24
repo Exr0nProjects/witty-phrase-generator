@@ -1,7 +1,22 @@
 extern crate getopts;
 use getopts::Options;
-use std::env;
-use rand::prelude::{ thread_rng, IteratorRandom };
+use std::{ env, borrow::Cow };
+use rand::prelude::{ ThreadRng, thread_rng, IteratorRandom };
+
+static PATH_INTENSIFIERS: Cow<str> = String::from_utf8_lossy(include_bytes!("intensifiers.txt"));
+static PATH_ADJECTIVES  : Cow<str> = String::from_utf8_lossy(include_bytes!("adjectives.txt")  );
+static PATH_NOUNS       : Cow<str> = String::from_utf8_lossy(include_bytes!("nouns.txt")       );
+
+fn gen(rng: &mut ThreadRng, num: usize) -> Vec<&'static str> {
+    let mut ret = Vec::with_capacity(num);
+    let mut n = 0;
+
+    if num > 2 { ret[n] = PATH_INTENSIFIERS.lines().choose(&mut rng).unwrap(); n += 1; }
+    if num > 1 { ret[n] = PATH_ADJECTIVES  .lines().choose(&mut rng).unwrap(); n += 1; }
+    if num > 0 { ret[n] = PATH_NOUNS       .lines().choose(&mut rng).unwrap(); n += 1; }
+
+    ret
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -21,25 +36,13 @@ fn main() {
         return;
     }
 
-    let path_intensifiers = String::from_utf8_lossy(include_bytes!("intensifiers.txt"));
-    let path_adjectives   = String::from_utf8_lossy(include_bytes!("adjectives.txt")  );
-    let path_nouns        = String::from_utf8_lossy(include_bytes!("nouns.txt")       );
-
-    let mut rng = thread_rng();
+    let mut rng: ThreadRng = thread_rng();
     let     num = matches.opt_get_default("n", 1)
                          .expect("Could not parse line count!");
     let     sep = matches.opt_get_default("s", "-".to_string())
                          .expect("Could not parse separator!");
 
     for _ in 0..num {
-        if !matches.opt_present("2") {
-            print!("{}{}", path_intensifiers.lines().choose(&mut rng).unwrap(), sep);
-        };
-
-        println!("{}{}{}",
-            path_adjectives  .lines().choose(&mut rng).unwrap(),
-            sep,
-            path_nouns       .lines().choose(&mut rng).unwrap(),
-        );
-    }
+        println!("{}", gen(&mut rng, num as usize).join(&sep));
+    };
 }
