@@ -47,7 +47,19 @@ fn main() {
     let path_adjectives   = String::from_utf8_lossy(include_bytes!("adjectives.txt")  );
     let path_nouns        = String::from_utf8_lossy(include_bytes!("nouns.txt")       );
 
+    // assert len > 0
     for _ in 0..num {
-        println!("{}", gen(&mut rng, len as usize, &path_intensifiers, &path_adjectives, &path_nouns).join(&sep));
+        let phrase = 'reroll: loop {
+            let got = gen(&mut rng, len as usize, &path_intensifiers, &path_adjectives, &path_nouns);
+            if matches.opt_present("a") {
+                for i in 1..len {
+                    if got[i].chars().nth(0) != got[0].chars().nth(0) {
+                        continue 'reroll;
+                    }
+                }
+            }
+            break got; 
+        };
+        println!("{}", phrase.join(&sep));
     };
 }
