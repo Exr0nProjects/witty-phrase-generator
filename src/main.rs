@@ -28,11 +28,12 @@ fn main() {
     let sep = matches.opt_get_default("s", "-".to_string())
                      .expect("Could not parse separator!");
 
-    let mut rng: ThreadRng = thread_rng();
+    let mut wp_gen = Generator::new();
+
     // assert len > 0
     for _ in 0..num {
         let phrase = 'reroll: loop {
-            let got = gen(&mut rng, len as usize, &path_intensifiers, &path_adjectives, &path_nouns);
+            let got = wp_gen.generic(len as usize);
             if matches.opt_present("a") {
                 for i in 1..len {
                     if got[i].chars().nth(0) != got[0].chars().nth(0) {

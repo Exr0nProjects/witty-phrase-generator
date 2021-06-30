@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-use std::str::Lines;
 use rand::prelude::{ ThreadRng, thread_rng, IteratorRandom };
 
 pub struct Generator {
@@ -39,24 +37,15 @@ impl Generator {
             path_nouns       ,
         }
     }
-    //pub fn gen_generic(&mut self) -> Vec<String> {
-    //    let path_intensifiers = include_str!("intensifiers.txt");
-    //    let path_adjectives   = include_str!("adjectives.txt");
-    //    let path_nouns        = include_str!("nouns.txt");
-    //}
+    pub fn generic(&mut self, num: usize) -> Vec<&'static str> {
+        let mut ret = vec![""; num];
+        let mut n = 0;
+
+        if num > 2 { ret[n] = self.path_intensifiers.iter().choose(&mut self.rng).unwrap(); n += 1; }
+        if num > 1 { ret[n] = self.path_adjectives  .iter().choose(&mut self.rng).unwrap(); n += 1; }
+        if num > 0 { ret[n] = self.path_nouns       .iter().choose(&mut self.rng).unwrap(); }
+
+        ret
+    }
 }
 
-fn gen<'a>(mut rng: &mut ThreadRng, num: usize, 
-       path_intensifiers: &'a Cow<str>,
-       path_adjectives  : &'a Cow<str>,
-       path_nouns       : &'a Cow<str>,
-       ) -> Vec<&'a str> {
-    let mut ret = vec![""; num];
-    let mut n = 0;
-
-    if num > 2 { ret[n] = path_intensifiers.lines().choose(&mut rng).unwrap(); n += 1; }
-    if num > 1 { ret[n] = path_adjectives  .lines().choose(&mut rng).unwrap(); n += 1; }
-    if num > 0 { ret[n] = path_nouns       .lines().choose(&mut rng).unwrap(); }
-
-    ret
-}
