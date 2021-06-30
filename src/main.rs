@@ -34,6 +34,7 @@ fn main() {
     // assert len > 0
     for _ in 0..num {
         let phrase = 'reroll: loop {
+            // TODO: subtract total seperator length before passing
             let got = wp_gen.with_words(words as usize).expect("Empty word list!");
             if matches.opt_present("a") {
                 for i in 1..words {
