@@ -25,6 +25,51 @@ impl Generator {
         }
     }
 
+    /// Generate a phrase vector if possible
+    ///
+    /// returns None if the conditions could not be satisfied
+    pub fn generic(&mut self,
+                   words: usize,
+                   count: usize,
+                   len_min: Option<usize>,
+                   len_max: Option<usize>,
+                   start_char: Option<char>
+                ) -> Option<Vec<Vec<&'static str>>> {
+
+        if len_max < len_min        { return None }
+        if words > 4 || words == 0  { return None }
+
+        let path_intensifiers = if start_char.is_some() {
+            self.path_intensifiers.iter().filter(
+                |x| x.chars().nth(0) == start_char
+            ).collect::<Vec<&&'static str>>()
+        } else { self.path_intensifiers.iter().map(|x| x).collect() };
+
+        let path_adjectives   = if start_char.is_some() {
+            self.path_adjectives  .iter().filter(
+                |x| x.chars().nth(0) == start_char
+            ).collect::<Vec<&&'static str>>()
+        } else { self.path_adjectives  .iter().map(|x| x).collect() };
+
+        let path_nouns        = if start_char.is_some() {
+            self.path_nouns       .iter().filter(
+                |x| x.chars().nth(0) == start_char
+            ).collect::<Vec<&&'static str>>()
+        } else { self.path_nouns       .iter().map(|x| x).collect() };
+
+
+//self.path_intensifiers.iter().filter(|s| s.len() < len_max);
+//self.path_adjectives  .iter().filter(|s| s.len() < len_max);
+//self.path_nouns       .iter().filter(|s| s.len() < len_max);
+
+        let mut ret = vec![vec![""; words]; count];
+
+
+
+
+        Some(ret)
+    }
+
     /// Generate a witty phrase with either 1, 2, or 3 words
     ///
     /// returns None when no phrase could be generated (eg. if one of the wordlists is empty)
