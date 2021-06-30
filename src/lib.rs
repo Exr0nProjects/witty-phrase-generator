@@ -39,28 +39,39 @@ impl Generator {
         if len_max < len_min        { return None }
         if words > 4 || words == 0  { return None }
 
-        let path_intensifiers = if start_char.is_some() {
-            self.path_intensifiers.iter().filter(
-                |x| x.chars().nth(0) == start_char
-            ).collect::<Vec<&&'static str>>()
-        } else { self.path_intensifiers.iter().map(|x| x).collect() };
+        //let mut path_intensifiers = if start_char.is_some() {
+        //    self.path_intensifiers.iter().filter(
+        //        |x| x.chars().nth(0) == start_char
+        //    ).collect::<Vec<&&'static str>>()
+        //} else { self.path_intensifiers.iter().map(|x| x).collect() };
+        //
+        //let mut path_adjectives   = if start_char.is_some() {
+        //    self.path_adjectives  .iter().filter(
+        //        |x| x.chars().nth(0) == start_char
+        //    ).collect::<Vec<&&'static str>>()
+        //} else { self.path_adjectives  .iter().map(|x| x).collect() };
+        //
+        //let mut path_nouns        = if start_char.is_some() {
+        //    self.path_nouns       .iter().filter(
+        //        |x| x.chars().nth(0) == start_char
+        //    ).collect::<Vec<&&'static str>>()
+        //} else { self.path_nouns       .iter().map(|x| x).collect() };
 
-        let path_adjectives   = if start_char.is_some() {
-            self.path_adjectives  .iter().filter(
-                |x| x.chars().nth(0) == start_char
-            ).collect::<Vec<&&'static str>>()
-        } else { self.path_adjectives  .iter().map(|x| x).collect() };
+        let mut path_intensifiers = self.path_intensifiers.iter().map(|x| x).collect::<Vec<&&'static str>>();
+        let mut path_adjectives   = self.path_adjectives  .iter().map(|x| x).collect::<Vec<&&'static str>>();
+        let mut path_nouns        = self.path_nouns       .iter().map(|x| x).collect::<Vec<&&'static str>>();
 
-        let path_nouns        = if start_char.is_some() {
-            self.path_nouns       .iter().filter(
-                |x| x.chars().nth(0) == start_char
-            ).collect::<Vec<&&'static str>>()
-        } else { self.path_nouns       .iter().map(|x| x).collect() };
+        if let Some(c) = start_char {
+            path_intensifiers.retain(|s| s.chars().nth(0).expect("empty word found!") == c);
+            path_adjectives  .retain(|s| s.chars().nth(0).expect("empty word found!") == c);
+            path_nouns       .retain(|s| s.chars().nth(0).expect("empty word found!") == c);
+        }
 
-
-//self.path_intensifiers.iter().filter(|s| s.len() < len_max);
-//self.path_adjectives  .iter().filter(|s| s.len() < len_max);
-//self.path_nouns       .iter().filter(|s| s.len() < len_max);
+        if let Some(m) = len_max {
+            path_intensifiers.retain(|s| s.len() < m);
+            path_adjectives  .retain(|s| s.len() < m);
+            path_nouns       .retain(|s| s.len() < m);
+        }
 
         let mut ret = vec![vec![""; words]; count];
 
