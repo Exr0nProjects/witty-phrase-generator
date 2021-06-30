@@ -12,3 +12,8 @@ $ witty-phrase-generator -2     # -> fantastic brush
 $ witty-phrase-generator -n 4   # (outputs 4 lines of 3-word phrases)
 ```
 
+Also supports alliteration, max length, and other features. Use `witty-phrase-generator --help` to learn more!
+
+## Improvements
+- always looking for more witty words to add to the wordlist.
+- alliteration and length algorithms are pretty random right now, and thus pretty slow if the constraints are tight.

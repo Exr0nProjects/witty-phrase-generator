@@ -12,6 +12,14 @@ repository = "https://github.com/Exr0nProjects/witty-phrase-generator"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "witty_phrase_generator"
+path = "src/lib.rs"
+
+[[bin]]
+name = "witty-phrase-generator"
+path = "src/main.rs"
+
 [dependencies]
 rand = "0.8.0"
 getopts = "0.2"

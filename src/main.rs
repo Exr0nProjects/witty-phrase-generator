@@ -1,22 +1,8 @@
 extern crate getopts;
 use getopts::Options;
-use std::{ env, borrow::Cow };
-use rand::prelude::{ ThreadRng, thread_rng, IteratorRandom };
+use std::env;
 
-fn gen<'a>(mut rng: &mut ThreadRng, num: usize, 
-       path_intensifiers: &'a Cow<str>,
-       path_adjectives  : &'a Cow<str>,
-       path_nouns       : &'a Cow<str>,
-       ) -> Vec<&'a str> {
-    let mut ret = vec![""; num];
-    let mut n = 0;
-
-    if num > 2 { ret[n] = path_intensifiers.lines().choose(&mut rng).unwrap(); n += 1; }
-    if num > 1 { ret[n] = path_adjectives  .lines().choose(&mut rng).unwrap(); n += 1; }
-    if num > 0 { ret[n] = path_nouns       .lines().choose(&mut rng).unwrap(); }
-
-    ret
-}
+use witty_phrase_generator::Generator;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -43,10 +29,6 @@ fn main() {
                      .expect("Could not parse separator!");
 
     let mut rng: ThreadRng = thread_rng();
-    let path_intensifiers = String::from_utf8_lossy(include_bytes!("intensifiers.txt"));
-    let path_adjectives   = String::from_utf8_lossy(include_bytes!("adjectives.txt")  );
-    let path_nouns        = String::from_utf8_lossy(include_bytes!("nouns.txt")       );
-
     // assert len > 0
     for _ in 0..num {
         let phrase = 'reroll: loop {
