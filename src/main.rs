@@ -7,9 +7,10 @@ use witty_phrase_generator::Generator;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let mut opts = Options::new();
-    opts.optopt("n", "num", "set number of phrases to generate", "NUM");
+    opts.optopt("n", "num", "set number of phrases to generate, default is 1", "NUM");
     opts.optopt("s", "sep", "set the character used between words, default is -", "CHAR");
-    opts.optflag("2", "", "generate a two word phrase (adjective-noun)");
+    opts.optflag("2", "", "generate two word phrases (adjective-noun) instead of (intensifier-adjective-noun)");
+    opts.optflag("4", "", "generate four word phrases (intensifier-adjective-noun-noun) instead"); // TODO: mutually exclusive group
     opts.optflag("a", "alliterate", "force words in a phrase to start with the same letter");
     opts.optflag("h", "help", "print this help menu then exit");
     let matches = match opts.parse(&args[1..]) {
@@ -22,7 +23,7 @@ fn main() {
         return;
     }
 
-    let len = if matches.opt_present("2") { 2 } else { 3 };
+    let words = if matches.opt_present("4") { 4 } else if matches.opt_present("2") { 2 } else { 3 };
     let num = matches.opt_get_default("n", 1)
                      .expect("Could not parse line count!");
     let sep = matches.opt_get_default("s", "-".to_string())
@@ -33,9 +34,9 @@ fn main() {
     // assert len > 0
     for _ in 0..num {
         let phrase = 'reroll: loop {
-            let got = wp_gen.generic(len as usize);
+            let got = wp_gen.with_words(words as usize).expect("Empty word list!");
             if matches.opt_present("a") {
-                for i in 1..len {
+                for i in 1..words {
                     if got[i].chars().nth(0) != got[0].chars().nth(0) {
                         continue 'reroll;
                     }
