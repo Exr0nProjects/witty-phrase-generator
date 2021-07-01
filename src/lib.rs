@@ -51,6 +51,7 @@ impl Generator {
                              dict: &[Vec<&&'static str>; 4],
                              format: &Vec<usize>,
                             ) -> Option<Vec<&'static str>> {
+        println!("dict {} format {} dep {}", dict.len(), format.len(), dep);
         let pool = &dict[format[dep]];
         
         let upper_bound = {
@@ -69,20 +70,22 @@ impl Generator {
             let selected = pool[shift[dep]];
             assert!(selected.len() <= len_max);
 
-            if dep == format.len() { // last iteration (base case)
+            if dep >= format.len()-1 { // last iteration (base case)
                 if selected.len() < len_min { break None } // would wrap all the way around 
+                break Some(vec![selected])
             }
 
-            match self.generate_backtracking(len_min - selected.len(),
+            match self.generate_backtracking((len_min as i32 - selected.len() as i32).max(0) as usize,
                                              len_max - selected.len(),
                                              dep+1, shift, dict, format) {
                 Some(mut suf) => {
                     suf.push(selected);
+                    shift[dep] += 1;
                     break Some(suf)
                 }
                 _ => {
                     shift[dep] += 1;
-                    for i in dep+1 .. shift.len() { shift[i] = 0; }
+                    //for i in dep+1 .. shift.len() { shift[i] = 0; }
                 }
             }
         }
@@ -106,34 +109,26 @@ impl Generator {
         if words > 4 || words == 0  { return None }
 
         // convert to references
-        let mut words_intensifiers = self.words_intensifiers.iter().map(|x| x).collect::<Vec<&&'static str>>();
-        let mut words_adjectives   = self.words_adjectives  .iter().map(|x| x).collect::<Vec<&&'static str>>();
-        let mut words_nouns        = self.words_nouns       .iter().map(|x| x).collect::<Vec<&&'static str>>();
-
-        // filter words we know we can't use
-        if let Some(c) = start_char {
-            words_intensifiers.retain(|s| s.chars().nth(0).expect("empty word found!") == c);
-            words_adjectives  .retain(|s| s.chars().nth(0).expect("empty word found!") == c);
-            words_nouns       .retain(|s| s.chars().nth(0).expect("empty word found!") == c);
-        }
-
-        // filter out words that are already longer than len_max
-        words_intensifiers.retain(|s| s.len() < len_max);
-        words_adjectives  .retain(|s| s.len() < len_max);
-        words_nouns       .retain(|s| s.len() < len_max);
-
-        // shuffle all the available words 
-        words_intensifiers.shuffle(&mut *self.rng.borrow_mut());
-        words_adjectives  .shuffle(&mut *self.rng.borrow_mut());
-        words_nouns       .shuffle(&mut *self.rng.borrow_mut());
-
-        // sort by length (stable sort, so still shuffled) for easier length matching
-        words_intensifiers.sort_by(|a, b| a.len().cmp(&b.len()));
-        words_adjectives  .sort_by(|a, b| a.len().cmp(&b.len()));
-        words_nouns       .sort_by(|a, b| a.len().cmp(&b.len()));
+        let words_intensifiers = self.words_intensifiers.iter().map(|x| x).collect::<Vec<&&'static str>>();
+        let words_adjectives   = self.words_adjectives  .iter().map(|x| x).collect::<Vec<&&'static str>>();
+        let words_nouns        = self.words_nouns       .iter().map(|x| x).collect::<Vec<&&'static str>>();
 
         // dictionary that we can recurse over
-        let dict = [Vec::new(), words_intensifiers, words_adjectives, words_nouns];
+        let mut dict = [Vec::new(), words_intensifiers, words_adjectives, words_nouns];
+
+        for list in &mut dict {
+            // filter words we know we can't use
+            if let Some(c) = start_char {
+                list.retain(|s| s.chars().nth(0).expect("empty word found!") == c);
+            }
+            list.retain(|s| s.len() < len_max);         // filter out words that are already longer than len_max
+            list.shuffle(&mut *self.rng.borrow_mut());  // shuffle all the available words 
+            list.sort_by(|a, b| a.len().cmp(&b.len())); // sort by length (stable sort, so still shuffled) for easier length matching
+        }
+
+        for list in &dict {
+            println!("{:?}", list)
+        }
 
         let mut ret = vec![vec![""; words]; count];
         let mut shift = [0 as usize; 4];
