@@ -9,6 +9,8 @@ fn main() {
     let mut opts = Options::new();
     opts.optopt("n", "num", "set number of phrases to generate, default is 1", "NUM");
     opts.optopt("s", "sep", "set the character used between words, default is -", "CHAR");
+    opts.optopt("c", "char", "specify alliteration char (shared by all phrases)", "CHAR");
+    //opts.optopt("l", "length", "length of generated phrase") // TODO
     opts.optflag("2", "", "generate two word phrases (adjective-noun) instead of (intensifier-adjective-noun)");
     opts.optflag("4", "", "generate four word phrases (intensifier-adjective-noun-noun) instead"); // TODO: mutually exclusive group
     opts.optflag("a", "alliterate", "force words in a phrase to start with the same letter");
@@ -31,31 +33,16 @@ fn main() {
 
     let wp_gen = WPGen::new();
 
-
-    if let Some(phrases) = if matches.opt_present("a") {
+    if let Some(phrases) = if matches.opt_present("a") && !matches.opt_present("c") {
                 wp_gen.with_phrasewise_alliteration(words, num, None, None) 
             } else {
-                wp_gen.generic(words, num, None, None, None) 
+                wp_gen.generic(words, num, None, None, matches.opt_str("c")
+                          .map(|x| x.chars().nth(0)
+                              .expect("Must specify allitteration char!"))
+                          .filter(|c| *c >= 'a' && *c <= 'z'))
             } {
-        println!("{}", phrases.iter()
-                 .map(|p| p.join(&sep))
-                 .collect::<Vec<String>>().join("\n"))
+        for p in phrases {
+            println!("{}", p.join(&sep))
+        }
     }
-
-    //// assert len > 0
-    //for _ in 0..num {
-    //    //let phrase = 'reroll: loop {
-    //    //    // TODO: subtract total seperator length before passing
-    //    //    let got = wp_gen.with_words(words as usize).expect("Empty word list!");
-    //    //    if matches.opt_present("a") {
-    //    //        for i in 1..words {
-    //    //            if got[i].chars().nth(0) != got[0].chars().nth(0) {
-    //    //                continue 'reroll;
-    //    //            }
-    //    //        }
-    //    //    }
-    //    //    break got; 
-    //    //};
-    //    println!("{}", phrase.join(&sep));
-    //};
 }

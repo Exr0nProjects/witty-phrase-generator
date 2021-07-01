@@ -3,7 +3,6 @@ use rand::Rng;
 use rand::seq::SliceRandom;
 
 use std::cell::RefCell;
-use std::iter;
 
 pub struct WPGen {
     rng: RefCell<ThreadRng>,
@@ -158,12 +157,17 @@ impl WPGen {
                    len_max: Option<usize>,
                 ) -> Option<Vec<Vec<&'static str>>> {
 
-        Some(iter::repeat(()).take(count)
-            .map(|()| self.generic(words, 1, len_min, len_max,
-                                   Some((*self.rng.borrow_mut())
-                                        .gen_range(b'a'..b'z'+1) as char)))
-            .filter_map(|x| Some(x?.remove(0)))
-            .collect())
+        let mut ret = Vec::new();
+        ret.reserve_exact(count);
+        for _ in 0..count {
+            ret.append(&mut loop {
+                let char = (*self.rng.borrow_mut()).gen_range(b'a'..b'z'+1) as char;
+                if let Some(p) = self.generic(words, 1, len_min, len_max, Some(char)) {
+                    break p
+                }
+            });
+        }
+        Some(ret)
     }
 
     /// Generate a witty phrase with either 1, 2, or 3 words
