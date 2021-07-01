@@ -31,7 +31,7 @@ fn main() {
 
     let wp_gen = Generator::new();
 
-    if let Some(phrases) = wp_gen.generic(2, 10, None, None, Some('c')) {
+    if let Some(phrases) = wp_gen.generic(3, 30, Some(20), Some(20), Some('a')) {
         for phrase in phrases {
             println!("{}", phrase.join(&sep));
         }

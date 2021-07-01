@@ -16,4 +16,4 @@ Also supports alliteration, max length, and other features. Use `witty-phrase-ge
 
 ## Improvements
 - always looking for more witty words to add to the wordlist.
-- alliteration and length algorithms are pretty random right now, and thus pretty slow if the constraints are tight.
+- can have duplicates (common if constraints are tight)

@@ -35,7 +35,7 @@ impl Generator {
         let mut ret = vec![0; words+1];
         let mut n = 1;
 
-        if words > 3 { ret[3] = 3 }
+        if words > 3 { ret[4] = 3 }
         if words > 2 { ret[n] = 1; n += 1; }
         if words > 1 { ret[n] = 2; n += 1; }
         if words > 0 { ret[n] = 3; }
@@ -47,48 +47,50 @@ impl Generator {
                              len_min: usize,
                              len_max: usize,
                              dep: usize,
-                             shift: &mut [usize; 4],    // which words of each position we've already used up (TODO: broken, since binary search window -> not contiguous usage, should technically be a hashset)
                              dict: &[Vec<&&'static str>; 4],
                              format: &Vec<usize>,
                             ) -> Option<Vec<&'static str>> {
-        println!("dict {} format {} dep {}", dict.len(), format.len(), dep);
         let pool = &dict[format[dep]];
         
-        let upper_bound = {
-            let [mut l, mut r] = [0, pool.len()];
-            while r - l > 1 {
-                let m = l+(r-l>>1);
-                if pool[m].len()+1 < len_max { l = m }
-                else { r = m }
-            };
-            l
-        };
+        //let upper_bound = {
+        //    let [mut l, mut r] = [0, pool.len()];
+        //    while r - l > 1 {
+        //        let m = l+(r-l>>1);
+        //        if pool[m].len() <= len_max +1 { l = m }
+        //        else { r = m }
+        //    };
+        //    l
+        //};
+        // TODO: use binary search
+        let mut upper_bound = 0;
+        while upper_bound < pool.len() && pool[upper_bound].len() <= len_max { upper_bound += 1; }
 
-        loop {
-            if shift[dep] >= upper_bound { break None } // shifted out of the window
 
-            let selected = pool[shift[dep]];
+        let pool = pool[0..upper_bound]
+                .choose_multiple(&mut *self.rng.borrow_mut(), upper_bound)
+                .collect::<Vec<&&&str>>();
+
+        let e = pool.len(); 
+
+        for selected in pool {
             assert!(selected.len() <= len_max);
+            //println!("{}{:width$} {} {}", " ".repeat(4*dep), selected, len_min, selected.len(), width=20);
+            println!("{}{:width$} {} (upper was {})", " ".repeat(4*dep), selected, e, width=20);
 
             if dep >= format.len()-1 { // last iteration (base case)
-                if selected.len() < len_min { break None } // would wrap all the way around 
-                break Some(vec![selected])
+                if selected.len() < len_min { continue } // would wrap all the way around 
+                return Some(vec![selected])
             }
 
-            match self.generate_backtracking((len_min as i32 - selected.len() as i32).max(0) as usize,
-                                             len_max - selected.len(),
-                                             dep+1, shift, dict, format) {
-                Some(mut suf) => {
-                    suf.push(selected);
-                    shift[dep] += 1;
-                    break Some(suf)
-                }
-                _ => {
-                    shift[dep] += 1;
-                    //for i in dep+1 .. shift.len() { shift[i] = 0; }
-                }
+            if let Some(mut suf) = self.generate_backtracking(
+                    (len_min as i32 - selected.len() as i32).max(0) as usize,
+                    len_max - selected.len(),
+                    dep+1, dict, format) {
+                suf.push(selected);
+                return Some(suf);
             }
-        }
+        };
+        None
     }
 
     /// Generate a requested phrases if possible
@@ -121,7 +123,7 @@ impl Generator {
             if let Some(c) = start_char {
                 list.retain(|s| s.chars().nth(0).expect("empty word found!") == c);
             }
-            list.retain(|s| s.len() < len_max);         // filter out words that are already longer than len_max
+            list.retain(|s| s.len() <= len_max);         // filter out words that are already longer than len_max
             list.shuffle(&mut *self.rng.borrow_mut());  // shuffle all the available words 
             list.sort_by(|a, b| a.len().cmp(&b.len())); // sort by length (stable sort, so still shuffled) for easier length matching
         }
@@ -131,10 +133,9 @@ impl Generator {
         }
 
         let mut ret = vec![vec![""; words]; count];
-        let mut shift = [0 as usize; 4];
 
         for i in 0..count {
-            if let Some(mut vec) = self.generate_backtracking(len_min, len_max, 1, &mut shift, &dict, &Generator::create_format(words)) {
+            if let Some(mut vec) = self.generate_backtracking(len_min, len_max, 1, &dict, &Generator::create_format(words)) {
                 vec.reverse();
                 ret[i] = vec;
             } else {

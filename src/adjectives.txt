@@ -14,7 +14,7 @@ acceptable
 accessible
 accountable
 accurate
-acid
+acidic
 active
 actual
 acute
@@ -57,8 +57,6 @@ annoying
 annual
 anonymous
 anxious
-anxiouser
-anxiousest
 apparent
 appealing
 applicable
@@ -85,8 +83,6 @@ available
 average
 awake
 aware
-awarer
-awarest
 awful
 awkward
 back
@@ -212,8 +208,6 @@ constitutional
 constructive
 contemporary
 content
-contenter
-contentest
 continental
 continuous
 contractual
@@ -325,7 +319,6 @@ dumb
 dynamic
 eager
 early
-east
 eastern
 easy
 ecclesiastical
@@ -458,8 +451,6 @@ fourth
 fragile
 free
 frequent
-frequenter
-frequentest
 fresh
 friendly
 frightened
@@ -473,7 +464,6 @@ fun
 functional
 fundamental
 funner
-funnest
 funny
 furious
 further
@@ -495,12 +485,8 @@ giant
 glad
 global
 glorious
-gloriouser
-gloriousest
 gold
 golden
-goldener
-goldenest
 good
 gorgeous
 gothic
@@ -557,8 +543,6 @@ identical
 ideological
 ill
 illegal
-iller
-illest
 imaginary
 imaginative
 immediate
@@ -608,8 +592,6 @@ integral
 integrated
 intellectual
 intelligent
-intelligenter
-intelligentest
 intended
 intense
 intensive
@@ -746,7 +728,6 @@ moderate
 modern
 modest
 modester
-modestest
 molecular
 monetary
 monthly
@@ -936,8 +917,6 @@ radical
 radioactive
 random
 rapid
-rapider
-rapidest
 rare
 rational
 raw
@@ -997,8 +976,6 @@ rubber
 rude
 rural
 sacred
-sacreder
-sacredest
 sad
 safe
 same
@@ -1024,8 +1001,6 @@ sensitive
 separate
 serial
 serious
-seriouser
-seriousest
 seventh
 severe
 sexual
@@ -1302,8 +1277,6 @@ worthwhile
 worthy
 written
 wrong
-wronger
-wrongest
 yellow
 young
 zero
