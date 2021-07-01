@@ -31,28 +31,31 @@ fn main() {
 
     let wp_gen = WPGen::new();
 
-    if let Some(phrases) = wp_gen.generic(4, 30, Some(25), Some(25), Some('a')) {
-        for phrase in phrases {
-            println!("{}", phrase.join(&sep));
-        }
-    }
-    
-    return ();
 
-    // assert len > 0
-    for _ in 0..num {
-        let phrase = 'reroll: loop {
-            // TODO: subtract total seperator length before passing
-            let got = wp_gen.with_words(words as usize).expect("Empty word list!");
-            if matches.opt_present("a") {
-                for i in 1..words {
-                    if got[i].chars().nth(0) != got[0].chars().nth(0) {
-                        continue 'reroll;
-                    }
-                }
-            }
-            break got; 
-        };
-        println!("{}", phrase.join(&sep));
-    };
+    if let Some(phrases) = if matches.opt_present("a") {
+                wp_gen.with_phrasewise_alliteration(words, num, None, None) 
+            } else {
+                wp_gen.generic(words, num, None, None, None) 
+            } {
+        println!("{}", phrases.iter()
+                 .map(|p| p.join(&sep))
+                 .collect::<Vec<String>>().join("\n"))
+    }
+
+    //// assert len > 0
+    //for _ in 0..num {
+    //    //let phrase = 'reroll: loop {
+    //    //    // TODO: subtract total seperator length before passing
+    //    //    let got = wp_gen.with_words(words as usize).expect("Empty word list!");
+    //    //    if matches.opt_present("a") {
+    //    //        for i in 1..words {
+    //    //            if got[i].chars().nth(0) != got[0].chars().nth(0) {
+    //    //                continue 'reroll;
+    //    //            }
+    //    //        }
+    //    //    }
+    //    //    break got; 
+    //    //};
+    //    println!("{}", phrase.join(&sep));
+    //};
 }

@@ -1,7 +1,9 @@
 use rand::prelude::{ ThreadRng, thread_rng, IteratorRandom };
+use rand::Rng;
 use rand::seq::SliceRandom;
 
 use std::cell::RefCell;
+use std::iter;
 
 pub struct WPGen {
     rng: RefCell<ThreadRng>,
@@ -89,9 +91,14 @@ impl WPGen {
         None
     }
 
-    /// Generate a requested phrases if possible
+    /// Generate the requested phrases if possible
     ///
-    /// returns None if the conditions could not be satisfied
+    /// Returns None if the conditions could not be satisfied
+    ///
+    /// All words (even across phrases) will start with start_char
+    /// if it is provided. To allow different phrases to alliterate
+    /// with different letters, use with_phrasewise_alliteration
+    /// instead. 
     pub fn generic(&self,
                    words: usize,
                    count: usize,
@@ -135,6 +142,28 @@ impl WPGen {
             }
         }
         Some(ret) 
+    }
+
+    /// Generate the requested phrases if possible
+    ///
+    /// Returns None if the conditions could not be satisfied
+    ///
+    /// Each phrase will alliterate internally, but different
+    /// phrases may start with different letters. To specify
+    /// what letter to start with, use generic() instead.
+    pub fn with_phrasewise_alliteration(&self,
+                   words: usize,
+                   count: usize,
+                   len_min: Option<usize>,
+                   len_max: Option<usize>,
+                ) -> Option<Vec<Vec<&'static str>>> {
+
+        Some(iter::repeat(()).take(count)
+            .map(|()| self.generic(words, 1, len_min, len_max,
+                                   Some((*self.rng.borrow_mut())
+                                        .gen_range(b'a'..b'z'+1) as char)))
+            .filter_map(|x| Some(x?.remove(0)))
+            .collect())
     }
 
     /// Generate a witty phrase with either 1, 2, or 3 words
