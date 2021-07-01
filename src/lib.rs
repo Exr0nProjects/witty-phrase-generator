@@ -3,15 +3,15 @@ use rand::seq::SliceRandom;
 
 use std::cell::RefCell;
 
-pub struct Generator {
+pub struct WPGen {
     rng: RefCell<ThreadRng>,
     words_intensifiers: Vec<&'static str>,
     words_adjectives: Vec<&'static str>,
     words_nouns: Vec<&'static str>,
 }
 
-impl Generator {
-    pub fn new() -> Generator {
+impl WPGen {
+    pub fn new() -> WPGen {
         let words_intensifiers = include_str!("intensifiers.txt");
         let words_adjectives   = include_str!("adjectives.txt")  ;
         let words_nouns        = include_str!("nouns.txt")       ;
@@ -20,7 +20,7 @@ impl Generator {
         let words_adjectives   = words_adjectives  .lines().collect::<Vec<&'static str>>();
         let words_nouns        = words_nouns       .lines().collect::<Vec<&'static str>>();
 
-        Generator { 
+        WPGen { 
             rng: RefCell::new(thread_rng()),
             words_intensifiers,
             words_adjectives  ,
@@ -61,7 +61,7 @@ impl Generator {
         //    };
         //    l
         //};
-        // TODO: use binary search
+        // TODO: is binary search even faster on such short wordlists?
         let mut upper_bound = 0;
         while upper_bound < pool.len() && pool[upper_bound].len() <= len_max { upper_bound += 1; }
 
@@ -70,12 +70,8 @@ impl Generator {
                 .choose_multiple(&mut *self.rng.borrow_mut(), upper_bound)
                 .collect::<Vec<&&&str>>();
 
-        let e = pool.len(); 
-
         for selected in pool {
             assert!(selected.len() <= len_max);
-            //println!("{}{:width$} {} {}", " ".repeat(4*dep), selected, len_min, selected.len(), width=20);
-            println!("{}{:width$} {} (upper was {})", " ".repeat(4*dep), selected, e, width=20);
 
             if dep >= format.len()-1 { // last iteration (base case)
                 if selected.len() < len_min { continue } // would wrap all the way around 
@@ -123,19 +119,15 @@ impl Generator {
             if let Some(c) = start_char {
                 list.retain(|s| s.chars().nth(0).expect("empty word found!") == c);
             }
-            list.retain(|s| s.len() <= len_max);         // filter out words that are already longer than len_max
-            list.shuffle(&mut *self.rng.borrow_mut());  // shuffle all the available words 
-            list.sort_by(|a, b| a.len().cmp(&b.len())); // sort by length (stable sort, so still shuffled) for easier length matching
-        }
-
-        for list in &dict {
-            println!("{:?}", list)
+            list.retain(|s| s.len() <= len_max/(words-1));  // filter out words that are already longer than len_max; TODO: too restrictive sometimes
+            list.shuffle(&mut *self.rng.borrow_mut());      // shuffle all the available words 
+            list.sort_by(|a, b| a.len().cmp(&b.len()));     // sort by length (stable sort, so still shuffled) for easier length matching
         }
 
         let mut ret = vec![vec![""; words]; count];
 
         for i in 0..count {
-            if let Some(mut vec) = self.generate_backtracking(len_min, len_max, 1, &dict, &Generator::create_format(words)) {
+            if let Some(mut vec) = self.generate_backtracking(len_min, len_max, 1, &dict, &WPGen::create_format(words)) {
                 vec.reverse();
                 ret[i] = vec;
             } else {

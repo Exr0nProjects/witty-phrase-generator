@@ -2,7 +2,7 @@ extern crate getopts;
 use getopts::Options;
 use std::env;
 
-use witty_phrase_generator::Generator;
+use witty_phrase_generator::WPGen;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -29,9 +29,9 @@ fn main() {
     let sep = matches.opt_get_default("s", "-".to_string())
                      .expect("Could not parse separator!");
 
-    let wp_gen = Generator::new();
+    let wp_gen = WPGen::new();
 
-    if let Some(phrases) = wp_gen.generic(3, 30, Some(20), Some(20), Some('a')) {
+    if let Some(phrases) = wp_gen.generic(4, 30, Some(25), Some(25), Some('a')) {
         for phrase in phrases {
             println!("{}", phrase.join(&sep));
         }
