@@ -1,8 +1,10 @@
 use rand::prelude::{ ThreadRng, thread_rng, IteratorRandom };
 use rand::seq::SliceRandom;
 
+use std::cell::RefCell;
+
 pub struct Generator {
-    rng: ThreadRng,
+    rng: RefCell<ThreadRng>,
     words_intensifiers: Vec<&'static str>,
     words_adjectives: Vec<&'static str>,
     words_nouns: Vec<&'static str>,
@@ -19,7 +21,7 @@ impl Generator {
         let words_nouns        = words_nouns       .lines().collect::<Vec<&'static str>>();
 
         Generator { 
-            rng: thread_rng(),
+            rng: RefCell::new(thread_rng()),
             words_intensifiers,
             words_adjectives  ,
             words_nouns       ,
@@ -41,7 +43,7 @@ impl Generator {
         ret
     }
 
-    fn generate_backtracking(&mut self,
+    fn generate_backtracking(&self,
                              len_min: usize,
                              len_max: usize,
                              dep: usize,
@@ -49,22 +51,14 @@ impl Generator {
                              dict: &[Vec<&&'static str>; 4],
                              format: &Vec<usize>,
                             ) -> Option<Vec<&'static str>> {
-        let mut ret = vec![&""; format.len()];
-
-        let pool = dict[format[dep]];
+        let pool = &dict[format[dep]];
         
-        // binary search on the words we can use given min/max len; inc l exc r
-        //let lower_bound = {
-        //    let [mut l, mut r] = [0, pool.len()];
-        //    while let m = l+(r-l>>1) {
-        //        if pool[m].len() < len_min { l = m } else { r = m }
-        //    };
-        //    l
-        //};
         let upper_bound = {
             let [mut l, mut r] = [0, pool.len()];
-            while let m = l+(r-l>>1) {
-                if pool[m].len()+1 < len_max { l = m } else { r = m }
+            while r - l > 1 {
+                let m = l+(r-l>>1);
+                if pool[m].len()+1 < len_max { l = m }
+                else { r = m }
             };
             l
         };
@@ -82,7 +76,7 @@ impl Generator {
             match self.generate_backtracking(len_min - selected.len(),
                                              len_max - selected.len(),
                                              dep+1, shift, dict, format) {
-                Some(suf) => {
+                Some(mut suf) => {
                     suf.push(selected);
                     break Some(suf)
                 }
@@ -97,7 +91,7 @@ impl Generator {
     /// Generate a requested phrases if possible
     ///
     /// returns None if the conditions could not be satisfied
-    pub fn generic(&mut self,
+    pub fn generic(&self,
                    words: usize,
                    count: usize,
                    len_min: Option<usize>,
@@ -129,9 +123,9 @@ impl Generator {
         words_nouns       .retain(|s| s.len() < len_max);
 
         // shuffle all the available words 
-        words_intensifiers.shuffle(&mut self.rng);
-        words_adjectives  .shuffle(&mut self.rng);
-        words_nouns       .shuffle(&mut self.rng);
+        words_intensifiers.shuffle(&mut *self.rng.borrow_mut());
+        words_adjectives  .shuffle(&mut *self.rng.borrow_mut());
+        words_nouns       .shuffle(&mut *self.rng.borrow_mut());
 
         // sort by length (stable sort, so still shuffled) for easier length matching
         words_intensifiers.sort_by(|a, b| a.len().cmp(&b.len()));
@@ -142,10 +136,11 @@ impl Generator {
         let dict = [Vec::new(), words_intensifiers, words_adjectives, words_nouns];
 
         let mut ret = vec![vec![""; words]; count];
-
         let mut shift = [0 as usize; 4];
+
         for i in 0..count {
-            if let Some(vec) = self.generate_backtracking(len_min, len_max, 1, &mut shift, &dict, &Generator::create_format(words)) {
+            if let Some(mut vec) = self.generate_backtracking(len_min, len_max, 1, &mut shift, &dict, &Generator::create_format(words)) {
+                vec.reverse();
                 ret[i] = vec;
             } else {
                 return None;
@@ -154,24 +149,18 @@ impl Generator {
         Some(ret) 
     }
 
-    //pub fn raw_with_len(&mut self, words: usize,
-    //                    words_intensifiers: Vec<&&'static str>,
-    //                    words_adjectives  : Vec<&&'static str>,
-    //                    words_nouns       : Vec<&&'static str>,
-    //                    ) -> Option(Vec<>)
-
     /// Generate a witty phrase with either 1, 2, or 3 words
     ///
     /// returns None when no phrase could be generated (eg. if one of the wordlists is empty)
-    pub fn with_words(&mut self, words: usize) -> Option<Vec<&'static str>> {
+    pub fn with_words(&self, words: usize) -> Option<Vec<&'static str>> {
         let mut ret = vec![""; words];
         let mut n = 0;
 
-        if words > 3 { ret[3] = self.words_nouns       .iter().choose(&mut self.rng)?; }
+        if words > 3 { ret[3] = self.words_nouns       .iter().choose(&mut *self.rng.borrow_mut())?; }
 
-        if words > 2 { ret[n] = self.words_intensifiers.iter().choose(&mut self.rng)?; n += 1; }
-        if words > 1 { ret[n] = self.words_adjectives  .iter().choose(&mut self.rng)?; n += 1; }
-        if words > 0 { ret[n] = self.words_nouns       .iter().choose(&mut self.rng)?; }
+        if words > 2 { ret[n] = self.words_intensifiers.iter().choose(&mut *self.rng.borrow_mut())?; n += 1; }
+        if words > 1 { ret[n] = self.words_adjectives  .iter().choose(&mut *self.rng.borrow_mut())?; n += 1; }
+        if words > 0 { ret[n] = self.words_nouns       .iter().choose(&mut *self.rng.borrow_mut())?; }
 
         Some(ret)
     }

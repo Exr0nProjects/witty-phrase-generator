@@ -29,7 +29,7 @@ fn main() {
     let sep = matches.opt_get_default("s", "-".to_string())
                      .expect("Could not parse separator!");
 
-    let mut wp_gen = Generator::new();
+    let wp_gen = Generator::new();
 
     // assert len > 0
     for _ in 0..num {
