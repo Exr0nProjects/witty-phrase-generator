@@ -32,3 +32,4 @@ Also supports alliteration, max length, and other features. Use `witty-phrase-ge
 - always looking for more witty words to add to the wordlist.
 - can have duplicates (common if constraints are tight)
 - allow generating with a given length but variable number of words
+- implement ablaut vowel rules for noun-noun phrases to make them sound nicer
