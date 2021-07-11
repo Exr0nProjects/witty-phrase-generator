@@ -4,6 +4,9 @@ use rand::seq::SliceRandom;
 
 use std::cell::RefCell;
 
+/// Base witty phrase generator struct
+///
+/// Make a new generator using the default wordlists with new().
 pub struct WPGen {
     rng: RefCell<ThreadRng>,
     words_intensifiers: Vec<&'static str>,
@@ -94,6 +97,11 @@ impl WPGen {
     ///
     /// Returns None if the conditions could not be satisfied
     ///
+    /// len_min and len_max denote the minimum and maximum number of
+    /// letters in all the concattenated words respectively. Note 
+    /// these lengths do not include seperator characters if they 
+    /// will be inserted.
+    ///
     /// All words (even across phrases) will start with start_char
     /// if it is provided. To allow different phrases to alliterate
     /// with different letters, use with_phrasewise_alliteration
@@ -146,6 +154,11 @@ impl WPGen {
     /// Generate the requested phrases if possible
     ///
     /// Returns None if the conditions could not be satisfied
+    ///
+    /// len_min and len_max denote the minimum and maximum number of
+    /// letters in all the concattenated words respectively. Note 
+    /// these lengths do not include seperator characters if they 
+    /// will be inserted.
     ///
     /// Each phrase will alliterate internally, but different
     /// phrases may start with different letters. To specify

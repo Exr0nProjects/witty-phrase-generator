@@ -7,9 +7,10 @@ Has minimal dependencies (just `rand` and `getopts`) and minimal bloat. Uses bac
 ## Usage
 
 ```sh
-$ witty-phrase-generator        # -> staggeringly-wise-alchohol
-$ witty-phrase-generator -2     # -> fantastic brush
-$ witty-phrase-generator -n 4   # (outputs 4 lines of 3-word phrases)
+$ witty-phrase-generator            # -> staggeringly-wise-alchohol
+$ witty-phrase-generator -2         # -> fantastic-brush
+$ witty-phrase-generator -n 4       # (outputs 4 lines of 3-word phrases)
+$ witty-phrase-generator -4c 'e'    # (outputs a four word phrase where each word starts with 'e')
 ```
 
 ```rust
