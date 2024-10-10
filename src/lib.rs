@@ -111,11 +111,13 @@ impl WPGen {
                    count: usize,
                    len_min: Option<usize>,
                    len_max: Option<usize>,
+                   word_len_max: Option<usize>,
                    start_char: Option<char>
                 ) -> Option<Vec<Vec<&'static str>>> {
 
         let len_min = len_min.unwrap_or(0);
         let len_max = len_max.unwrap_or(usize::MAX);
+        let word_len_max = word_len_max.unwrap_or(len_max / (words-1));
 
         if len_max < len_min        { return None }
         if words > 4 || words == 0  { return None }
@@ -133,9 +135,9 @@ impl WPGen {
             if let Some(c) = start_char {
                 list.retain(|s| s.chars().nth(0).expect("empty word found!") == c);
             }
-            list.retain(|s| s.len() <= len_max/(words-1));  // filter out words that are already longer than len_max; TODO: too restrictive sometimes
+            list.retain(|s| s.len() <= word_len_max);  // filter out words that are already longer than len_max; TODO: too restrictive sometimes
             list.shuffle(&mut *self.rng.borrow_mut());      // shuffle all the available words 
-            list.sort_by(|a, b| a.len().cmp(&b.len()));     // sort by length (stable sort, so still shuffled) for easier length matching
+            list.sort_by(|a, b: &&&str| a.len().cmp(&b.len()));     // sort by length (stable sort, so still shuffled) for easier length matching
         }
 
         let mut ret = vec![vec![""; words]; count];
@@ -168,6 +170,7 @@ impl WPGen {
                    count: usize,
                    len_min: Option<usize>,
                    len_max: Option<usize>,
+                   word_len_max: Option<usize>,
                 ) -> Option<Vec<Vec<&'static str>>> {
 
         let mut ret = Vec::new();
@@ -175,7 +178,7 @@ impl WPGen {
         for _ in 0..count {
             ret.append(&mut loop {
                 let char = (*self.rng.borrow_mut()).gen_range(b'a'..b'z'+1) as char;
-                if let Some(p) = self.generic(words, 1, len_min, len_max, Some(char)) {
+                if let Some(p) = self.generic(words, 1, len_min, len_max, word_len_max, Some(char)) {
                     break p
                 }
             });
